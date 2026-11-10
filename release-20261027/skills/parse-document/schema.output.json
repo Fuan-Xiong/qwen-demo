@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "archcomply:skill:parse-document:output",
+  "title": "ParseDocumentOutput",
+  "description": "parse-document 技能输出：成功返回 ParsedDoc（字段与主控指令的统一数据结构一致），失败返回 { ok: false, reason }。",
+  "type": "object",
+  "oneOf": [
+    {
+      "title": "成功：ParsedDoc",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["docId", "docName", "pageCount", "fullText", "separator", "blocks", "warnings"],
+      "properties": {
+        "docId": { "type": "string", "description": "文档唯一 ID" },
+        "docName": { "type": "string", "description": "文档名（含扩展名）" },
+        "pageCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "PDF = 最大页码；DOCX/TXT 无分页信息 = 0"
+        },
+        "fullText": { "type": "string", "description": "全文纯文本：blocks 按序以 separator 连接" },
+        "separator": { "const": "\n", "description": "块间连接符，恒为换行" },
+        "warnings": {
+          "type": "array",
+          "description": "该文档自己的解析告警（可为空数组）；全批汇总见入口 metrics.warnings",
+          "items": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "page": { "type": ["integer", "null"] },
+              "pages": { "type": "array", "items": { "type": "integer" } },
+              "count": { "type": "integer" }
+            }
+          }
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/block" }
+        }
+      }
+    },
+    {
+      "title": "失败",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "reason"],
+      "properties": {
+        "ok": { "const": false, "description": "解析失败标记" },
+        "reason": { "type": "string", "description": "带上下文的失败原因（格式/无文本/空 buffer 等）" }
+      }
+    }
+  ],
+  "definitions": {
+    "block": {
+      "type": "object",
+      "description": "统一 Block 结构（与主控指令一致）",
+      "additionalProperties": false,
+      "required": ["blockId", "docId", "docName", "page", "type", "heading", "text", "charStart", "charEnd"],
+      "properties": {
+        "blockId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$",
+          "description": "md5(docId + \":\" + blockIndex + \":\" + heading + \":\" + text)；heading 为 null 时按空串参与哈希"
+        },
+        "docId": { "type": "string" },
+        "docName": { "type": "string" },
+        "page": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "PDF 必填（1-based）；DOCX/TXT 无分页信息时为 null"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["paragraph", "heading", "table", "table_cell", "list_item"]
+        },
+        "heading": {
+          "type": ["string", "null"],
+          "description": "所属章节标题（最近的 heading 块文本）；无标题时 null"
+        },
+        "text": { "type": "string" },
+        "charStart": { "type": "integer", "minimum": 0, "description": "在 fullText 中的起始偏移（左闭）" },
+        "charEnd": { "type": "integer", "minimum": 0, "description": "在 fullText 中的结束偏移（右开）" },
+        "bbox": {
+          "type": "object",
+          "description": "仅 PDF：近似包围盒（PDF 用户空间坐标，y 向上）",
+          "additionalProperties": false,
+          "required": ["x0", "top", "x1", "bottom"],
+          "properties": {
+            "x0": { "type": "number" },
+            "top": { "type": "number" },
+            "x1": { "type": "number" },
+            "bottom": { "type": "number" }
+          }
+        },
+        "rows": {
+          "type": "array",
+          "description": "仅 table 类型：逐行单元格文本",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "runId": "baseline_001",
+  "tokens": {
+    "prompt": 0,
+    "completion": 0,
+    "total": 0,
+    "estimated": false
+  },
+  "elapsedMs": 884,
+  "stages": {
+    "PARSING": 580,
+    "RULE_LOADING": 0,
+    "PLANNING": 0,
+    "EXECUTING": 303,
+    "VERIFYING": 1
+  },
+  "rules": {
+    "total": 3,
+    "pass": 1,
+    "fail": 1,
+    "review": 1,
+    "failed": 0
+  },
+  "maxRounds": 3,
+  "coverage": {
+    "total": 3,
+    "done": 3,
+    "review": 0,
+    "failed": 0,
+    "details": {
+      "R001": "done",
+      "R002": "done",
+      "R003": "done"
+    }
+  }
+}

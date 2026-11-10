@@ -1,0 +1,7 @@
+{
+  "documents": [
+    { "docId": "可行性研究报告合规审查规则", "docName": "可行性研究报告合规审查规则.docx", "path": "data/real-docs/可行性研究报告合规审查规则.docx", "isRuleDoc": true },
+    { "docId": "国网浙江磐安县供电公司生产特种车辆专项维修_可研报告", "docName": "国网浙江磐安县供电公司生产特种车辆专项维修_可研报告.pdf", "path": "data/real-docs/国网浙江磐安县供电公司生产特种车辆专项维修_可研报告.pdf", "isRuleDoc": false }
+  ],
+  "ruleDoc": { "docId": "可行性研究报告合规审查规则", "path": "data/real-docs/可行性研究报告合规审查规则.docx" }
+}

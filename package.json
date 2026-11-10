@@ -1,0 +1,30 @@
+{
+  "name": "archcomply",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "合同/标书合规评审系统：Agent 协同逐条核查，覆盖矩阵 + 点击溯源",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "mock": "node mock/sse-server.mjs",
+    "validate": "node mock/validate.mjs",
+    "cli": "node src/cli.js",
+    "frontend": "npm --prefix frontend-vue3 run dev",
+    "frontend:install": "npm --prefix frontend-vue3 install",
+    "check": "npm run validate && node --check src/server.js && node --check src/harness/harness.js && node --check src/harness/sse.js && node --check src/harness/metrics.js && node --check src/harness/sdkClient.js && node --check src/rules/parser/index.js && node --check src/rules/parser/ocr.js && node --check src/rules/loadRules.js && node --check src/rules/compareRule.js && node --check src/rules/evidence.js && node --check src/rules/coverage.js"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.13",
+    "@qwen-code/sdk": "^0.1.22",
+    "cheerio": "^1.2.0",
+    "js-tiktoken": "^1.0.21",
+    "mammoth": "^1.13.0",
+    "pdfjs-dist": "^6.4.299",
+    "picocolors": "^1.1.1"
+  }
+}

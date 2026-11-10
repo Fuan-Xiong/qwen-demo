@@ -1,0 +1,34 @@
+[
+  {
+    "ruleId": "R001",
+    "ruleName": "五常线规格存在",
+    "checkType": "deterministic",
+    "keywords": ["五常"],
+    "priority": "P0",
+    "severity": "high"
+  },
+  {
+    "ruleId": "R002",
+    "ruleName": "履约保函金额",
+    "checkType": "deterministic",
+    "keywords": ["履约保函"],
+    "priority": "P1",
+    "severity": "medium"
+  },
+  {
+    "ruleId": "R003",
+    "ruleName": "付款条款语义",
+    "checkType": "semantic",
+    "evidenceRequirement": "付款",
+    "priority": "P2",
+    "severity": "medium"
+  },
+  {
+    "ruleId": "R004",
+    "ruleName": "跨文档结算一致性",
+    "checkType": "cross_doc",
+    "evidenceRequirement": "结算",
+    "priority": "P2",
+    "severity": "high"
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "ruleId": "R001",
+    "ruleName": "五常线规格存在",
+    "status": "pass",
+    "severity": "high",
+    "confidence": 0.9,
+    "reason": "规则 R001 命中关键词上下文",
+    "evidence": []
+  },
+  {
+    "ruleId": "R002",
+    "ruleName": "履约保函金额",
+    "status": "fail",
+    "severity": "medium",
+    "confidence": 0.8,
+    "reason": "未检索到规则 R002 要求的内容",
+    "evidence": []
+  },
+  {
+    "ruleId": "R003",
+    "ruleName": "付款条款语义",
+    "status": "review",
+    "severity": "medium",
+    "confidence": null,
+    "reason": "未注入 semantic 比对器",
+    "evidence": []
+  }
+]

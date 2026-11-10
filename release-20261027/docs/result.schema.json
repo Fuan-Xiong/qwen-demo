@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archcomply.local/result.schema.json",
+  "title": "ArchComply Review Result",
+  "description": "单次评审的最终结果。B2 产出 issues/evidence，B1 汇总并作为 SSE result 事件发送，F 按此渲染卡片与图表。字段只增不改，改名=破坏契约。",
+  "type": "object",
+  "required": ["reviewId", "status", "summary", "issues", "coverage", "metrics"],
+  "additionalProperties": false,
+  "properties": {
+    "reviewId": {
+      "type": "string",
+      "description": "本次评审唯一 ID（uuid），前端日志与复跑对账用"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["done", "partial", "error", "aborted"],
+      "description": "done=全部规则跑完；partial=有规则 pending/review；error=链路异常；aborted=用户中断"
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total", "pass", "fail", "review", "riskLevel"],
+      "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "pass": { "type": "integer", "minimum": 0 },
+        "fail": { "type": "integer", "minimum": 0 },
+        "review": { "type": "integer", "minimum": 0 },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "由 issues 中最高的严重级别决定"
+        },
+        "conclusion": {
+          "type": "string",
+          "description": "一句话人话结论，前端聊天框直接展示"
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "description": "只放 fail 和 review，pass 不进数组（降 Token 与渲染成本）",
+      "items": {
+        "type": "object",
+        "required": ["ruleId", "verdict", "severity", "title", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "ruleId": { "type": "string", "pattern": "^R\\d{3}$" },
+          "verdict": { "type": "string", "enum": ["fail", "review"] },
+          "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+          "title": { "type": "string", "description": "规则名，如「报价有效期」" },
+          "reason": { "type": "string", "description": "为什么不合规，一句话" },
+          "suggestion": { "type": "string", "description": "整改建议" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "method": {
+            "type": "string",
+            "enum": ["deterministic", "semantic"],
+            "description": "判定方式，用于路演讲 Token 优化"
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "description": "铁律：无证据不判 fail，fail 必填至少 1 条",
+            "items": { "$ref": "#/$defs/evidence" }
+          }
+        },
+        "if": { "properties": { "verdict": { "const": "fail" } } },
+        "then": { "required": ["evidence"] }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["total", "done", "review", "pending", "rate", "items"],
+      "description": "规则覆盖矩阵：不漏查的保险，B2 产出、队长验收",
+      "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "done": { "type": "integer", "minimum": 0 },
+        "review": { "type": "integer", "minimum": 0 },
+        "pending": { "type": "integer", "minimum": 0 },
+        "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "uncoveredAlerts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "未覆盖的 ruleId 列表，前端红字告警"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ruleId", "state"],
+            "additionalProperties": false,
+            "properties": {
+              "ruleId": { "type": "string" },
+              "state": { "type": "string", "enum": ["done", "review", "pending"] },
+              "verdict": { "type": "string", "enum": ["pass", "fail", "review"] }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["tokenIn", "tokenOut", "tokenTotal", "durationMs"],
+      "description": "队长路演要讲的指标，B1 统计、F 展示",
+      "additionalProperties": false,
+      "properties": {
+        "tokenIn": { "type": "integer", "minimum": 0 },
+        "tokenOut": { "type": "integer", "minimum": 0 },
+        "tokenTotal": { "type": "integer", "minimum": 0 },
+        "durationMs": { "type": "integer", "minimum": 0 },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "durationMs"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string", "enum": ["parse", "rules", "plan", "execute", "verify", "report"] },
+              "durationMs": { "type": "integer", "minimum": 0 },
+              "tokenTotal": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "llmCalls": { "type": "integer", "minimum": 0 },
+        "deterministicCalls": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "documents": {
+      "type": "array",
+      "description": "参与评审的文档元信息，溯源跳转用",
+      "items": {
+        "type": "object",
+        "required": ["docId", "docName"],
+        "additionalProperties": false,
+        "properties": {
+          "docId": { "type": "string" },
+          "docName": { "type": "string" },
+          "pageCount": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": ["docId", "blockId", "charStart", "charEnd", "snippet"],
+      "additionalProperties": false,
+      "properties": {
+        "docId": { "type": "string" },
+        "docName": { "type": "string" },
+        "page": { "type": "integer", "minimum": 1, "description": "1-based；docx 无页码时可省略" },
+        "blockId": { "type": "string", "description": "解析层段落唯一 id，如 p-000123。前端靠它高亮" },
+        "charStart": { "type": "integer", "minimum": 0, "description": "块内字符偏移，左闭" },
+        "charEnd": { "type": "integer", "minimum": 0, "description": "块内字符偏移，右开" },
+        "snippet": { "type": "string", "maxLength": 300, "description": "命中原文截断，最多 300 字" }
+      }
+    }
+  }
+}
